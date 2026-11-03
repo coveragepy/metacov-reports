@@ -15,18 +15,27 @@ defaults:
     shell: bash
 
 permissions:
-  contents: write
+  contents: read
+
+concurrency:
+  group: "${{ github.workflow }}"
+  cancel-in-progress: true
 
 jobs:
   trim:
-
+    name: "Trim stored data"
     runs-on: ubuntu-latest
 
-    steps:
-      - name: Check out repo
-        uses: actions/checkout@v5
+    permissions:
+      id-token: write       # needed for git push
 
-      - name: Remove old reports
+    steps:
+      - name: "Check out repo"
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: "Remove old reports"
         run: |
           ls -1d reports/$(date -d "3 months ago" +%Y%m)* | xargs git rm -r
           git config user.name 'Ned Batchelder'
